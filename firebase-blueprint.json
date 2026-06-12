@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "medication": {
+      "title": "Medication",
+      "description": "A medication entry for a user",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the medication" },
+        "dose": { "type": "string", "description": "Dosage information" },
+        "instruction": { "type": "string", "description": "Instructions for taking" },
+        "time": { "type": "string", "description": "Time to take the medication" },
+        "status": { "type": "string", "enum": ["Scheduled", "Taken"], "description": "Current status" },
+        "taken": { "type": "boolean", "description": "Whether it has been taken" },
+        "uid": { "type": "string", "description": "Owner user ID" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["name", "dose", "uid"]
+    },
+    "appointment": {
+      "title": "Appointment",
+      "description": "A medical appointment or session",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title or doctor name" },
+        "type": { "type": "string", "description": "Type of appointment and time" },
+        "date": { "type": "string", "description": "Day of the month" },
+        "month": { "type": "string", "description": "Month abbreviation" },
+        "year": { "type": "string", "description": "Year" },
+        "completed": { "type": "boolean", "description": "Whether the session is complete" },
+        "uid": { "type": "string", "description": "Owner user ID" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["title", "date", "month", "year", "uid"]
+    },
+    "userProfile": {
+      "title": "User Profile",
+      "description": "User specific settings and goals",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "stepsGoal": { "type": "number" },
+        "hydrationGoal": { "type": "number" },
+        "sleepGoal": { "type": "number" }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "userProfile",
+      "description": "User profile document"
+    },
+    "/users/{uid}/meds/{medId}": {
+      "schema": "medication",
+      "description": "User's medications"
+    },
+    "/users/{uid}/appointments/{apptId}": {
+      "schema": "appointment",
+      "description": "User's appointments"
+    }
+  }
+}

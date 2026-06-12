@@ -1,0 +1,128 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {uid}
+// Fields:
+//   - uid: string (required)
+//   - email: string (required)
+//   - displayName: string
+//   - photoURL: string
+//   - stepsGoal: number
+//   - hydrationGoal: number
+//   - sleepGoal: number
+//
+// Collection: users/{uid}/meds
+// Document ID: {medId}
+// Fields:
+//   - name: string (required)
+//   - dose: string (required)
+//   - instruction: string
+//   - time: string
+//   - status: string (enum: Scheduled, Taken)
+//   - taken: bool
+//   - uid: string (required)
+//   - createdAt: timestamp
+//
+// Collection: users/{uid}/appointments
+// Document ID: {apptId}
+// Fields:
+//   - title: string (required)
+//   - type: string
+//   - date: string (required)
+//   - month: string (required)
+//   - year: string (required)
+//   - completed: bool
+//   - uid: string (required)
+//   - createdAt: timestamp
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "favourmoronfolu@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'photoURL', 'stepsGoal', 'hydrationGoal', 'sleepGoal', 'role']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email);
+    }
+
+    function isValidMed(data) {
+      return hasOnlyAllowedFields(['name', 'dose', 'instruction', 'time', 'status', 'taken', 'uid', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.dose is string && data.dose.size() < 50 &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidAppt(data) {
+      return hasOnlyAllowedFields(['title', 'type', 'date', 'month', 'year', 'completed', 'uid', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.date is string && data.date.size() > 0 && data.date.size() <= 2 &&
+             data.month is string && data.month.size() == 3 &&
+             data.year is string && data.year.size() == 4 &&
+             data.uid == request.auth.uid;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+      
+      match /meds/{medId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidMed(request.resource.data);
+        allow update: if isOwner(userId) && isValidMed(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+      
+      match /appointments/{apptId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidAppt(request.resource.data);
+        allow update: if isOwner(userId) && isValidAppt(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
