@@ -9,17 +9,17 @@ export default function CTA() {
         viewport={{ once: true }}
         className="cta-card"
       >
-        <h2 className="cta-title">Join the Evening Sanctuary.</h2>
-        <p className="cta-description">Experience health management that respects your time and peace.</p>
+        <h2 className="cta-title">Start your wellness journey today.</h2>
+        <p className="cta-description">Never miss a medication or appointment. Stay organized, stay well.</p>
         
         <div className="cta-form">
           <input 
             className="cta-input" 
-            placeholder="Enter your email" 
+            placeholder="Your email address" 
             type="email"
           />
           <button className="btn-cta btn-cta-primary cta-gradient">
-            Subscribe
+            Get Started
           </button>
         </div>
       </motion.div>

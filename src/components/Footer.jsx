@@ -3,15 +3,10 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-container max-w-7xl">
         <div className="footer-brand">
-          <div className="footer-logo-container">
-            <img 
-              alt="Nocturne Sanctuary Logo" 
-              className="footer-logo" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtxlaR4BRCJcikNm2ms-vpazR-tCbZQuqcmAoHMd9IooV2GJllRHFZpctTLT6kRIyvuEbkstqRKPQgErI7Q8-GZB5c9s3LsJATujPTZTmyhhq9Re-wtrRTYw5FyEJ4d2CwOXR9DNBjNhqq38Elx8V7_BK0ZJv1cchMIzlclLN9oBFecV4jg5dEQkA7PlDdSNNAL_y_ZYhN1s2ypHVMKqvhNbg-ubJOx9mOQlzXl2XzGcwQNnEjSrGZAlKxToZfVg0QoZ5iSTUCP7lh"
-              referrerPolicy="no-referrer"
-            />
+          <div className="footer-logo-container" style={{ marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--on-surface)' }}>LifeCue</h3>
           </div>
-          <p className="footer-tagline">Elevating the clinical experience with nocturnal focus and aesthetic precision.</p>
+          <p className="footer-tagline">Your health, organized. Simple wellness management you can trust.</p>
         </div>
         
         <div className="footer-links">
@@ -23,7 +18,7 @@ export default function Footer() {
         </div>
         
         <div className="footer-copyright">
-          © 2024 Evening Sanctuary Wellness. All rights reserved.
+          © 2024 LifeCue. All rights reserved.
         </div>
       </div>
     </footer>

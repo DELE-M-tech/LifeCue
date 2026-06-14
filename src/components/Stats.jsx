@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
 
 const stats = [
-  { value: "98%", label: "Dose Adherence", color: "var(--primary)" },
-  { value: "12k+", label: "Active Patients", color: "var(--secondary)" },
-  { value: "24/7", label: "Clinical Support", color: "var(--tertiary)" },
-  { value: "4.9", label: "Patient Rating", color: "var(--on-surface)" },
+  { value: "98%", label: "Medications On Time", color: "var(--primary)" },
+  { value: "12k+", label: "Active Users", color: "var(--secondary)" },
+  { value: "24/7", label: "Always Available", color: "var(--tertiary)" },
+  { value: "4.9", label: "User Rating", color: "var(--on-surface)" },
 ];
 
 export default function Stats() {

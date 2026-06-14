@@ -78,18 +78,18 @@ export default function SignIn() {
             transition={{ duration: 0.8 }}
             className="auth-quote-card"
           >
-            <h1 className="auth-quote-title">Mindfulness meets management.</h1>
+            <h1 className="auth-quote-title">Take control of your health.</h1>
             <p className="auth-quote-text">
-              Step into a digital sanctuary designed for deep focus. Precise data wrapped in the quiet elegance of evening.
+              Manage your medications, appointments, and wellness in one simple, secure place.
             </p>
             <div className="auth-stats">
               <div className="auth-stat-item">
                 <h4>12k+</h4>
-                <p>Calm Users</p>
+                <p>Users Trusted</p>
               </div>
               <div className="auth-stat-item">
                 <h4>98%</h4>
-                <p>Peace of Mind</p>
+                <p>On-Time Doses</p>
               </div>
             </div>
           </motion.div>
@@ -98,18 +98,13 @@ export default function SignIn() {
 
       {/* Right Side - Form */}
       <div className="auth-right">
-        <Link to="/">
-          <img 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtxlaR4BRCJcikNm2ms-vpazR-tCbZQuqcmAoHMd9IooV2GJllRHFZpctTLT6kRIyvuEbkstqRKPQgErI7Q8-GZB5c9s3LsJATujPTZTmyhhq9Re-wtrRTYw5FyEJ4d2CwOXR9DNBjNhqq38Elx8V7_BK0ZJv1cchMIzlclLN9oBFecV4jg5dEQkA7PlDdSNNAL_y_ZYhN1s2ypHVMKqvhNbg-ubJOx9mOQlzXl2XzGcwQNnEjSrGZAlKxToZfVg0QoZ5iSTUCP7lh" 
-            alt="LifeCue" 
-            className="auth-logo"
-            referrerPolicy="no-referrer"
-          />
+        <Link to="/" style={{ display: 'inline-block', marginBottom: '2rem' }}>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--on-surface)' }}>LifeCue</h3>
         </Link>
         
         <div className="auth-header">
           <h2>Sign In</h2>
-          <p>Welcome back to your private sanctuary.</p>
+          <p>Welcome back. Your health is waiting.</p>
         </div>
 
         <div className="auth-form">
@@ -207,7 +202,7 @@ export default function SignIn() {
           <a href="#">Terms</a>
           <a href="#">Support</a>
         </div>
-        <p className="copyright-small">© 2026 Editorial Wellness. Secure & Encrypted.</p>
+        <p className="copyright-small">© 2026 LifeCue. Secure & Encrypted.</p>
       </div>
     </div>
   );

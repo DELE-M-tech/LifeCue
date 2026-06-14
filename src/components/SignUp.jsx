@@ -82,18 +82,18 @@ export default function SignUp() {
             transition={{ duration: 0.8 }}
             className="auth-quote-card"
           >
-            <h1 className="auth-quote-title">Your journey to calm starts here.</h1>
+            <h1 className="auth-quote-title">Your health, organized.</h1>
             <p className="auth-quote-text">
-              Join a community dedicated to mindful health management. Experience the quiet elegance of evening sanctuary.
+              Join thousands managing their wellness simply. Track meds, appointments, and daily health in one place.
             </p>
             <div className="auth-stats">
               <div className="auth-stat-item">
                 <h4>24/7</h4>
-                <p>Support</p>
+                <p>Available</p>
               </div>
               <div className="auth-stat-item">
                 <h4>4.9</h4>
-                <p>User Rating</p>
+                <p>Rated by Users</p>
               </div>
             </div>
           </motion.div>
@@ -102,18 +102,13 @@ export default function SignUp() {
 
       {/* Right Side - Form */}
       <div className="auth-right">
-        <Link to="/">
-          <img 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtxlaR4BRCJcikNm2ms-vpazR-tCbZQuqcmAoHMd9IooV2GJllRHFZpctTLT6kRIyvuEbkstqRKPQgErI7Q8-GZB5c9s3LsJATujPTZTmyhhq9Re-wtrRTYw5FyEJ4d2CwOXR9DNBjNhqq38Elx8V7_BK0ZJv1cchMIzlclLN9oBFecV4jg5dEQkA7PlDdSNNAL_y_ZYhN1s2ypHVMKqvhNbg-ubJOx9mOQlzXl2XzGcwQNnEjSrGZAlKxToZfVg0QoZ5iSTUCP7lh" 
-            alt="LifeCue" 
-            className="auth-logo"
-            referrerPolicy="no-referrer"
-          />
+        <Link to="/" style={{ display: 'inline-block', marginBottom: '2rem' }}>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--on-surface)' }}>LifeCue</h3>
         </Link>
         
         <div className="auth-header">
           <h2>Get Started</h2>
-          <p>Begin your private sanctuary experience.</p>
+          <p>Create your account in seconds.</p>
         </div>
 
         <div className="auth-form">
@@ -221,7 +216,7 @@ export default function SignUp() {
           <a href="#">Terms</a>
           <a href="#">Support</a>
         </div>
-        <p className="copyright-small">© 2026 Editorial Wellness. Secure & Encrypted.</p>
+        <p className="copyright-small">© 2026 LifeCue. Secure & Encrypted.</p>
       </div>
     </div>
   );

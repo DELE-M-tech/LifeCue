@@ -82,14 +82,8 @@ export default function MedicationsPage() {
       <nav className="navbar glass-header" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 100 }}>
         <div className="nav-container max-w-7xl" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '5rem' }}>
           <div className="logo">
-            <Link to="/">
-              <img 
-                alt="LifeCue" 
-                className="footer-logo" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtxlaR4BRCJcikNm2ms-vpazR-tCbZQuqcmAoHMd9IooV2GJllRHFZpctTLT6kRIyvuEbkstqRKPQgErI7Q8-GZB5c9s3LsJATujPTZTmyhhq9Re-wtrRTYw5FyEJ4d2CwOXR9DNBjNhqq38Elx8V7_BK0ZJv1cchMIzlclLN9oBFecV4jg5dEQkA7PlDdSNNAL_y_ZYhN1s2ypHVMKqvhNbg-ubJOx9mOQlzXl2XzGcwQNnEjSrGZAlKxToZfVg0QoZ5iSTUCP7lh"
-                referrerPolicy="no-referrer"
-                style={{ height: '2rem' }}
-              />
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--on-surface)', margin: 0 }}>LifeCue</h3>
             </Link>
           </div>
           
