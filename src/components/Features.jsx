@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Pill, Calendar, Droplet, ArrowRight, Moon } from 'lucide-react';
+import { Pill, Calendar, Droplet, ArrowRight } from 'lucide-react';
 
 export default function Features() {
   return (
@@ -92,42 +92,20 @@ export default function Features() {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
             className="feature-card card-wellness"
+            style={{ minHeight: '120px' }}
           >
             <div className="feature-icon-wrap" style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}>
               <Droplet className="feature-icon" style={{ color: 'var(--secondary)' }} />
             </div>
-            <h3 className="feature-title">Daily wellness log</h3>
-            <p className="feature-description" style={{ marginBottom: '1.5rem' }}>
+            <h3 className="feature-title" style={{ marginBottom: '0.25rem' }}>Daily wellness log</h3>
+            <p className="feature-description">
               Track water, sleep, and movement in seconds. Small habits,
               tracked consistently, add up to better days.
             </p>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
               <span className="tag-pill">Sleep</span>
               <span className="tag-pill">Hydration</span>
               <span className="tag-pill">Steps</span>
-            </div>
-          </motion.div>
-
-          {/* Insights Accent */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="feature-card card-accent"
-          >
-            <svg className="accent-image" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
-              <rect width="500" height="400" fill="var(--surface-container)" />
-              <circle cx="380" cy="80" r="140" fill="var(--primary-container)" opacity="0.6" />
-              <circle cx="450" cy="320" r="100" fill="var(--secondary-container)" opacity="0.7" />
-            </svg>
-            <div className="accent-overlay">
-              <div>
-                <Moon style={{ width: '2rem', height: '2rem', color: 'var(--primary)', marginBottom: '1rem' }} />
-                <p className="accent-quote">
-                  "A few minutes each evening is all it takes to stay on top of tomorrow."
-                </p>
-              </div>
             </div>
           </motion.div>
         </div>

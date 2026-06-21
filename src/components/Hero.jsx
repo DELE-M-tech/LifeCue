@@ -34,14 +34,9 @@ export default function Hero() {
                 Go to Dashboard
               </Link>
             ) : (
-              <>
-                <Link to="/signup" className="btn-cta btn-cta-primary cta-gradient" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                  Get Started Free
-                </Link>
-                <Link to="/signin" className="btn-cta btn-cta-secondary" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                  Sign In
-                </Link>
-              </>
+              <Link to="/signup" className="btn-cta btn-cta-primary cta-gradient hero-btn-large" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                Start Tracking My Appointments
+              </Link>
             )}
           </div>
         </motion.div>

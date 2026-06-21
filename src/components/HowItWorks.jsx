@@ -34,17 +34,16 @@ export default function HowItWorks() {
   const { user } = useHealth();
 
   return (
-    <section className="how-it-works">
+    <section id="how-to-get-started" className="how-it-works">
       <div className="max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="section-header"
-          style={{ margin: '0 auto 4rem', textAlign: 'center', maxWidth: '36rem' }}
         >
           <span className="section-eyebrow">Getting started</span>
-          <h2 className="section-title">Up and running in three steps.</h2>
+          <h2 className="section-title">How to get started.</h2>
           <p className="section-description">
             No complicated setup. Just sign up, tell LifeCue about your routine,
             and let it take care of the rest.
@@ -83,7 +82,7 @@ export default function HowItWorks() {
             style={{ textAlign: 'center', marginTop: '3.5rem' }}
           >
             <Link to="/signup" className="btn-cta btn-cta-primary cta-gradient" style={{ textDecoration: 'none', display: 'inline-block' }}>
-              Get Started Free
+              Start Tracking Medications
             </Link>
           </motion.div>
         )}
