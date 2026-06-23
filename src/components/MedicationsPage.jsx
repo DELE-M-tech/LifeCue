@@ -1,13 +1,14 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Bell, Settings, Droplets, X, Calendar, Pill, ChevronLeft } from 'lucide-react';
+import { Plus, Droplets, X, Calendar, Pill, ChevronLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useHealth } from '../context/HealthContext.jsx';
+import AppLayout from './AppLayout.jsx';
 
 export default function MedicationsPage() {
   const navigate = useNavigate();
   const { 
-    user, isAuthReady, logout,
+    user, isAuthReady,
     meds, handleAddMed, handleLogMed, handleDeleteMed,
     appointments, handleAddAppt, handleDeleteAppt, handleToggleAppt
   } = useHealth();
@@ -64,11 +65,6 @@ export default function MedicationsPage() {
     setIsApptModalOpen(false);
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
-
   if (!isAuthReady || !user) {
     return (
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)' }}>
@@ -77,39 +73,9 @@ export default function MedicationsPage() {
     );
   }
   return (
-    <div className="dashboard-container">
-      {/* Navigation */}
-      <nav className="navbar glass-header" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 100 }}>
-        <div className="nav-container max-w-7xl" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '5rem' }}>
-          <div className="logo">
-            <Link to="/" style={{ textDecoration: 'none' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--on-surface)', margin: 0 }}>LifeCue</h3>
-            </Link>
-          </div>
-          
-          <div className="nav-links" style={{ display: 'flex', gap: '2rem' }}>
-            <Link to="/dashboard" className="nav-link" style={{ color: 'var(--on-surface-variant)', textDecoration: 'none' }}>Dashboard</Link>
-            <Link to="/medications" className="nav-link active" style={{ color: 'var(--primary)', fontWeight: 'bold', textDecoration: 'none' }}>Medications</Link>
-            <Link to="/calendar" className="nav-link" style={{ color: 'var(--on-surface-variant)', textDecoration: 'none' }}>Calendar</Link>
-            <Link to="#" className="nav-link" style={{ color: 'var(--on-surface-variant)', textDecoration: 'none' }}>Logger</Link>
-          </div>
-
-          <div className="nav-actions" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-            <Bell size={20} className="nav-link" style={{ cursor: 'pointer' }} />
-            <Settings size={20} className="nav-link" style={{ cursor: 'pointer' }} />
-            <div 
-              onClick={handleLogout}
-              className="profile-circle" 
-              style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--primary)', cursor: 'pointer' }}
-              title="Logout"
-            >
-              <img src={user.photoURL || "https://i.pravatar.cc/150?u=favour"} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl" style={{ paddingTop: '7rem', paddingBottom: '2rem' }}>
+    <AppLayout>
+      <div style={{ padding: '2rem 2.5rem' }}>
+        <main className="max-w-7xl" style={{ paddingTop: '0', paddingBottom: '2rem' }}>
         <header style={{ marginBottom: '3rem' }}>
           <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', textDecoration: 'none', marginBottom: '1rem', fontWeight: 'bold' }}>
             <ChevronLeft size={20} /> Back to Dashboard
@@ -227,7 +193,8 @@ export default function MedicationsPage() {
             </div>
           </section>
         </div>
-      </main>
+        </main>
+      </div>
 
       {/* Add Medication Modal */}
       <AnimatePresence>
@@ -405,6 +372,6 @@ export default function MedicationsPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </AppLayout>
   );
 }
