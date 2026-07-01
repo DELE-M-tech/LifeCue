@@ -55,34 +55,33 @@ export function HealthProvider({ children }) {
 
   const logout = () => supabase.auth.signOut();
 
-  // ── Wellness setters with persistence ────────────────────────
-  const setStepsTaken = (val) => {
-    _setStepsTaken(val);
+  // ── Tracker persistence (atomic goal + taken) ────────────────
+  const updateTracker = async (type, taken, goal) => {
     if (!user) return;
-    localStorage.setItem(`lifecue_steps_taken_${user.id}`, val);
-    if (isSupabaseConfigured) {
-      supabase.from('users').update({ steps_taken: val }).eq('uid', user.id)
-        .catch(err => console.warn('steps_taken update failed:', err));
-    }
-  };
 
-  const setHydrationTaken = (val) => {
-    _setHydrationTaken(val);
-    if (!user) return;
-    localStorage.setItem(`lifecue_hydration_taken_${user.id}`, val);
-    if (isSupabaseConfigured) {
-      supabase.from('users').update({ hydration_taken: val }).eq('uid', user.id)
-        .catch(err => console.warn('hydration_taken update failed:', err));
-    }
-  };
+    const setGoal = { steps: setStepsGoal, hydration: setHydrationGoal, sleep: setSleepGoal }[type];
+    const setTakenFn = { steps: _setStepsTaken, hydration: _setHydrationTaken, sleep: _setSleepTaken }[type];
 
-  const setSleepTaken = (val) => {
-    _setSleepTaken(val);
-    if (!user) return;
-    localStorage.setItem(`lifecue_sleep_taken_${user.id}`, val);
-    if (isSupabaseConfigured) {
-      supabase.from('users').update({ sleep_taken: val }).eq('uid', user.id)
-        .catch(err => console.warn('sleep_taken update failed:', err));
+    setGoal(goal);
+    setTakenFn(taken);
+
+    if (!isSupabaseConfigured) {
+      localStorage.setItem(`lifecue_${type}_goal_${user.id}`, goal);
+      localStorage.setItem(`lifecue_${type}_taken_${user.id}`, taken);
+      return;
+    }
+
+    const dbGoalCol = `${type}_goal`;
+    const dbTakenCol = `${type}_taken`;
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ [dbGoalCol]: goal, [dbTakenCol]: taken })
+        .eq('uid', user.id);
+      if (error) throw error;
+    } catch (err) {
+      console.error(`Error updating ${type} tracker:`, err);
     }
   };
 
@@ -167,7 +166,7 @@ export function HealthProvider({ children }) {
     };
 
     fetchData();
-  }, [user]);
+  }, [user?.id]);
 
   // ── Daily reset timer ─────────────────────────────────────────
   useEffect(() => {
@@ -178,9 +177,9 @@ export function HealthProvider({ children }) {
       const diff = midnight.getTime() - now.getTime();
 
       if (diff <= 0) {
-        setStepsTaken(0);
-        setHydrationTaken(0);
-        setSleepTaken(0);
+        _setStepsTaken(0);
+        _setHydrationTaken(0);
+        _setSleepTaken(0);
       }
 
       const h = Math.floor(diff / 3600000);
@@ -284,28 +283,6 @@ export function HealthProvider({ children }) {
     } catch (err) { console.error('Error toggling appt:', err); }
   };
 
-  const handleUpdateGoals = async (goals) => {
-    if (!user) return;
-    if (!isSupabaseConfigured) {
-      if (goals.stepsGoal !== undefined) { setStepsGoal(goals.stepsGoal); localStorage.setItem(`lifecue_steps_goal_${user.id}`, goals.stepsGoal); }
-      if (goals.hydrationGoal !== undefined) { setHydrationGoal(goals.hydrationGoal); localStorage.setItem(`lifecue_hydration_goal_${user.id}`, goals.hydrationGoal); }
-      if (goals.sleepGoal !== undefined) { setSleepGoal(goals.sleepGoal); localStorage.setItem(`lifecue_sleep_goal_${user.id}`, goals.sleepGoal); }
-      return;
-    }
-    try {
-      const mapped = {};
-      if (goals.stepsGoal !== undefined) mapped.steps_goal = goals.stepsGoal;
-      if (goals.hydrationGoal !== undefined) mapped.hydration_goal = goals.hydrationGoal;
-      if (goals.sleepGoal !== undefined) mapped.sleep_goal = goals.sleepGoal;
-
-      const { error } = await supabase.from('users').update(mapped).eq('uid', user.id);
-      if (error) throw error;
-      if (goals.stepsGoal) setStepsGoal(goals.stepsGoal);
-      if (goals.hydrationGoal) setHydrationGoal(goals.hydrationGoal);
-      if (goals.sleepGoal) setSleepGoal(goals.sleepGoal);
-    } catch (err) { console.error('Error updating goals:', err); }
-  };
-
   const calculateCompletion = () => {
     const stepsScore = Math.min(1, stepsTaken / stepsGoal);
     const hydrationScore = Math.min(1, hydrationTaken / hydrationGoal);
@@ -320,15 +297,15 @@ export function HealthProvider({ children }) {
     user, isAuthReady, login, loginWithEmail, registerWithEmail, logout,
     meds, appointments,
     stepsGoal, setStepsGoal,
-    stepsTaken, setStepsTaken,
+    stepsTaken,
     hydrationGoal, setHydrationGoal,
-    hydrationTaken, setHydrationTaken,
+    hydrationTaken,
     sleepGoal, setSleepGoal,
-    sleepTaken, setSleepTaken,
+    sleepTaken,
     timeLeft,
     handleAddMed, handleLogMed, handleDeleteMed,
     handleAddAppt, handleDeleteAppt, handleToggleAppt,
-    handleUpdateGoals, calculateCompletion,
+    updateTracker, calculateCompletion,
     isSupabaseConfigured
   };
 

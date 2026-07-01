@@ -44,10 +44,10 @@ export default function Dashboard() {
     user, isAuthReady,
     meds, handleAddMed, handleLogMed, handleDeleteMed,
     appointments, handleAddAppt, handleDeleteAppt, handleToggleAppt,
-    stepsGoal, stepsTaken, setStepsTaken,
-    hydrationGoal, hydrationTaken, setHydrationTaken,
-    sleepGoal, sleepTaken, setSleepTaken,
-    timeLeft, calculateCompletion, handleUpdateGoals
+    stepsGoal, stepsTaken,
+    hydrationGoal, hydrationTaken,
+    sleepGoal, sleepTaken,
+    timeLeft, calculateCompletion, updateTracker
   } = useHealth();
 
   useEffect(() => {
@@ -99,16 +99,7 @@ export default function Dashboard() {
 
   const onUpdateTracker = (e) => {
     e.preventDefault();
-    if (trackerModal === 'steps') {
-      handleUpdateGoals({ stepsGoal: Number(tempTracker.goal) });
-      setStepsTaken(Number(tempTracker.taken));
-    } else if (trackerModal === 'hydration') {
-      handleUpdateGoals({ hydrationGoal: Number(tempTracker.goal) });
-      setHydrationTaken(Number(tempTracker.taken));
-    } else if (trackerModal === 'sleep') {
-      handleUpdateGoals({ sleepGoal: Number(tempTracker.goal) });
-      setSleepTaken(Number(tempTracker.taken));
-    }
+    updateTracker(trackerModal, Number(tempTracker.taken), Number(tempTracker.goal));
     setTrackerModal(null);
   };
 
