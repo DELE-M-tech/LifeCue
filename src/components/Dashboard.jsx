@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useHealth } from '../context/HealthContext.jsx';
 import AppLayout from './AppLayout.jsx';
+import DatePicker from './DatePicker.jsx';
 
 const Spinner = () => (
   <div className="app-loading">
@@ -28,11 +29,13 @@ function Modal({ title, subtitle, onClose, children }) {
         className="modal-content" onClick={e => e.stopPropagation()}
       >
         <button className="modal-close" onClick={onClose}><X size={18} /></button>
-        <div className="modal-header">
-          <h2 className="modal-title">{title}</h2>
-          <p className="modal-subtitle">{subtitle}</p>
+        <div className="modal-scroll">
+          <div className="modal-header">
+            <h2 className="modal-title">{title}</h2>
+            <p className="modal-subtitle">{subtitle}</p>
+          </div>
+          {children}
         </div>
-        {children}
       </motion.div>
     </motion.div>
   );
@@ -42,7 +45,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const {
     user, isAuthReady,
-    meds, handleAddMed, handleLogMed, handleDeleteMed,
+    meds, handleAddMed, handleLogMed, handleDeleteMed, medLogsToday,
     appointments, handleAddAppt, handleDeleteAppt, handleToggleAppt,
     stepsGoal, stepsTaken,
     hydrationGoal, hydrationTaken,
@@ -59,12 +62,9 @@ export default function Dashboard() {
   const [trackerModal, setTrackerModal] = useState(null);
   const [loggedId, setLoggedId] = useState(null);
   const [newMed, setNewMed] = useState({ name: '', dose: '', instruction: '', time: '' });
-  const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
   const [newAppt, setNewAppt] = useState({
     title: '', type: '',
-    date: new Date().getDate().toString(),
-    month: months[new Date().getMonth()],
-    year: new Date().getFullYear().toString()
+    dateValue: new Date().toISOString().slice(0, 10)
   });
   const [tempTracker, setTempTracker] = useState({ goal: 0, taken: 0 });
 
@@ -82,8 +82,16 @@ export default function Dashboard() {
 
   const onAddAppt = (e) => {
     e.preventDefault();
-    handleAddAppt(newAppt);
-    setNewAppt({ title: '', type: '', date: new Date().getDate().toString(), month: months[new Date().getMonth()], year: new Date().getFullYear().toString() });
+    const d = new Date(newAppt.dateValue + 'T00:00:00');
+    const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+    handleAddAppt({
+      title: newAppt.title,
+      type: newAppt.type,
+      date: d.getDate().toString(),
+      month: months[d.getMonth()],
+      year: d.getFullYear().toString()
+    });
+    setNewAppt({ title: '', type: '', dateValue: new Date().toISOString().slice(0, 10) });
     setApptModal(false);
   };
 
@@ -106,7 +114,7 @@ export default function Dashboard() {
   if (!isAuthReady || !user) return <Spinner />;
 
   const completion = calculateCompletion();
-  const nextMed = meds.find(m => !m.taken);
+  const nextMed = meds.find(m => !medLogsToday[m.id]);
   const upcomingAppts = appointments.filter(a => !a.completed);
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
 
@@ -210,13 +218,13 @@ export default function Dashboard() {
               ) : (
                 <div className="dash-med-row-list">
                   {meds.map(med => (
-                    <div key={med.id} className={`dash-med-row ${med.taken ? 'taken' : ''}`}>
-                      <div className="dash-med-row-dot" style={{ background: med.taken ? 'var(--secondary)' : 'var(--primary)' }} />
+                    <div key={med.id} className={`dash-med-row ${medLogsToday[med.id] ? 'taken' : ''}`}>
+                      <div className="dash-med-row-dot" style={{ background: medLogsToday[med.id] ? 'var(--secondary)' : 'var(--primary)' }} />
                       <div className="dash-med-row-info">
                         <span className="dash-med-row-name">{med.name}</span>
                         <span className="dash-med-row-meta">{med.dose} · {med.time}</span>
                       </div>
-                      {med.taken
+                      {medLogsToday[med.id]
                         ? <span className="dash-taken-chip">✓ Taken</span>
                         : <button className="dash-med-row-log" onClick={() => onLogMed(med.id)} disabled={loggedId === med.id}>
                             {loggedId === med.id ? '...' : 'Log'}
@@ -411,23 +419,12 @@ export default function Dashboard() {
                   <label className="form-label">Title / Doctor</label>
                   <input className="form-input" placeholder="e.g. Dr. Adeyemi" value={newAppt.title} onChange={e => setNewAppt({...newAppt, title: e.target.value})} required />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Day</label>
-                  <select className="form-input" value={newAppt.date} onChange={e => setNewAppt({...newAppt, date: e.target.value})}>
-                    {Array.from({length:31},(_,i)=>(i+1).toString()).map(d => <option key={d}>{d}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Month</label>
-                  <select className="form-input" value={newAppt.month} onChange={e => setNewAppt({...newAppt, month: e.target.value})}>
-                    {months.map(m => <option key={m}>{m}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Year</label>
-                  <select className="form-input" value={newAppt.year} onChange={e => setNewAppt({...newAppt, year: e.target.value})}>
-                    {[new Date().getFullYear().toString(), (new Date().getFullYear()+1).toString()].map(y => <option key={y}>{y}</option>)}
-                  </select>
+                <div className="form-group form-group-full">
+                  <label className="form-label">Date</label>
+                  <DatePicker
+                    value={newAppt.dateValue}
+                    onChange={(iso) => setNewAppt({...newAppt, dateValue: iso})}
+                  />
                 </div>
                 <div className="form-group form-group-full">
                   <label className="form-label">Details</label>

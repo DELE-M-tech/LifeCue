@@ -9,7 +9,7 @@ export default function MedicationsPage() {
   const navigate = useNavigate();
   const { 
     user, isAuthReady,
-    meds, handleAddMed, handleLogMed, handleDeleteMed,
+    meds, handleAddMed, handleLogMed, handleDeleteMed, medLogsToday,
     appointments, handleAddAppt, handleDeleteAppt, handleToggleAppt
   } = useHealth();
 
@@ -109,17 +109,17 @@ export default function MedicationsPage() {
                   </div>
                 ) : (
                   meds.map((med) => (
-                    <div key={med.id} className="appointment-item" style={{ opacity: med.taken ? 0.6 : 1 }}>
+                    <div key={med.id} className="appointment-item" style={{ opacity: medLogsToday[med.id] ? 0.6 : 1 }}>
                       <div className="date-box" style={{ background: 'rgba(181, 26, 43, 0.1)', color: 'var(--primary)' }}>
                         <Pill size={20} />
                       </div>
                       <div className="appointment-details">
-                        <h4 style={{ textDecoration: med.taken ? 'line-through' : 'none' }}>{med.name}</h4>
+                        <h4 style={{ textDecoration: medLogsToday[med.id] ? 'line-through' : 'none' }}>{med.name}</h4>
                         <p>{med.dose} • {med.time}</p>
                         <p style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>{med.instruction}</p>
                       </div>
                       <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        {!med.taken && (
+                        {!medLogsToday[med.id] && (
                           <button 
                             className="med-log-btn"
                             style={{ margin: 0, padding: '0.5rem 1rem', fontSize: '0.75rem' }}
