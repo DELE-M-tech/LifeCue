@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Pill, Droplets, Moon, Footprints, Calendar, X, Check } from 'lucide-react';
 import { useHealth } from '../context/HealthContext.jsx';
 import AppLayout from './AppLayout.jsx';
+import { SkelBlock, SkelCard } from './Skeletons.jsx';
 
 function DayDetailModal({ log, meds, onClose, fetchDayDetail, localDetail }) {
   const [detail, setDetail] = useState(localDetail ?? null);
@@ -93,8 +94,8 @@ function DayDetailModal({ log, meds, onClose, fetchDayDetail, localDetail }) {
             <p className="detail-empty">No appointment activity this day.</p>
           ) : (
             <div className="detail-med-list">
-              {detail.apptsDetail.map(apt => (
-                <div key={apt.id} className="detail-med-row">
+              {detail.apptsDetail.map((apt, i) => (
+                <div key={i} className="detail-med-row">
                   <div
                     className="detail-med-check"
                     style={{
@@ -195,8 +196,10 @@ export default function Logger() {
         <div className="logger-history-label">History</div>
 
         {historyLoading ? (
-          <div className="dash-empty-state">
-            <p>Loading history…</p>
+          <div className="logger-list">
+            <SkelCard><SkelBlock width="130px" height="1rem" style={{ marginBottom: '0.85rem' }} /><SkelBlock width="90%" height="0.8rem" /></SkelCard>
+            <SkelCard><SkelBlock width="130px" height="1rem" style={{ marginBottom: '0.85rem' }} /><SkelBlock width="90%" height="0.8rem" /></SkelCard>
+            <SkelCard><SkelBlock width="130px" height="1rem" style={{ marginBottom: '0.85rem' }} /><SkelBlock width="90%" height="0.8rem" /></SkelCard>
           </div>
         ) : historyLogs.length === 0 ? (
           <div className="dash-card">

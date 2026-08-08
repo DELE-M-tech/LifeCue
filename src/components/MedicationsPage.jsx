@@ -1,39 +1,59 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Droplets, X, Calendar, Pill, ChevronLeft } from 'lucide-react';
+import { Plus, X, Calendar, Pill, ChevronLeft, ChevronRight as ChevronRightIcon, Check } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useHealth } from '../context/HealthContext.jsx';
 import AppLayout from './AppLayout.jsx';
+import DatePicker from './DatePicker.jsx';
+import { SkelBlock, SkelCard, SkelRow, SkelTopbar } from './Skeletons.jsx';
+
+function Modal({ title, subtitle, onClose, children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="modal-overlay" onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0, y: 16 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 16 }}
+        className="modal-content" onClick={e => e.stopPropagation()}
+      >
+        <button className="modal-close" onClick={onClose}><X size={18} /></button>
+        <div className="modal-scroll">
+          <div className="modal-header">
+            <h2 className="modal-title">{title}</h2>
+            <p className="modal-subtitle">{subtitle}</p>
+          </div>
+          {children}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 export default function MedicationsPage() {
   const navigate = useNavigate();
-  const { 
+  const {
     user, isAuthReady,
     meds, handleAddMed, handleLogMed, handleDeleteMed, medLogsToday,
     appointments, handleAddAppt, handleDeleteAppt, handleToggleAppt
   } = useHealth();
 
   useEffect(() => {
-    if (isAuthReady && !user) {
-      navigate('/signin');
-    }
+    if (isAuthReady && !user) navigate('/signin');
   }, [user, isAuthReady, navigate]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newMed, setNewMed] = useState({ name: '', dose: '', instruction: '', time: '' });
-  const [loggedId, setLoggedId] = useState(null);
   const [isApptModalOpen, setIsApptModalOpen] = useState(false);
-  const [newAppt, setNewAppt] = useState({ 
-    title: '', 
-    type: '', 
-    date: new Date().getDate().toString(), 
-    month: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"][new Date().getMonth()],
-    year: new Date().getFullYear().toString()
+  const [loggedId, setLoggedId] = useState(null);
+  const [newMed, setNewMed] = useState({ name: '', dose: '', instruction: '', time: '' });
+  const [newAppt, setNewAppt] = useState({
+    title: '', type: '',
+    dateValue: new Date().toISOString().slice(0, 10)
   });
 
-  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-  const years = [new Date().getFullYear().toString(), (new Date().getFullYear() + 1).toString()];
-  const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+  const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
   const onAddMed = (e) => {
     e.preventDefault();
@@ -45,331 +65,227 @@ export default function MedicationsPage() {
 
   const onLogMed = (id) => {
     setLoggedId(id);
-    setTimeout(() => {
-      handleLogMed(id);
-      setLoggedId(null);
-    }, 2000);
+    setTimeout(() => { handleLogMed(id); setLoggedId(null); }, 900);
   };
 
   const onAddAppt = (e) => {
     e.preventDefault();
-    if (!newAppt.title || !newAppt.date) return;
-    handleAddAppt(newAppt);
-    setNewAppt({ 
-      title: '', 
-      type: '', 
-      date: new Date().getDate().toString(), 
-      month: months[new Date().getMonth()],
-      year: new Date().getFullYear().toString()
+    if (!newAppt.title) return;
+    const d = new Date(newAppt.dateValue + 'T00:00:00');
+    handleAddAppt({
+      title: newAppt.title,
+      type: newAppt.type,
+      date: d.getDate().toString(),
+      month: months[d.getMonth()],
+      year: d.getFullYear().toString()
     });
+    setNewAppt({ title: '', type: '', dateValue: new Date().toISOString().slice(0, 10) });
     setIsApptModalOpen(false);
   };
 
   if (!isAuthReady || !user) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)' }}>
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} style={{ width: '40px', height: '40px', border: '4px solid var(--primary)', borderTopColor: 'transparent', borderRadius: '50%' }} />
-      </div>
+      <AppLayout>
+        <div className="skel-page">
+          <SkelBlock width="160px" height="0.85rem" style={{ marginBottom: '1.25rem' }} />
+          <SkelTopbar />
+          <div className="med-page-grid">
+            <SkelCard>
+              <SkelBlock width="140px" height="1.2rem" style={{ marginBottom: '1rem' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <SkelRow /><SkelRow /><SkelRow />
+              </div>
+            </SkelCard>
+            <SkelCard>
+              <SkelBlock width="140px" height="1.2rem" style={{ marginBottom: '1rem' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <SkelRow /><SkelRow />
+              </div>
+            </SkelCard>
+          </div>
+        </div>
+      </AppLayout>
     );
   }
+
+  const upcomingAppts = appointments.filter(a => !a.completed);
+
   return (
     <AppLayout>
-      <div style={{ padding: '2rem 2.5rem' }}>
-        <main className="max-w-7xl" style={{ paddingTop: '0', paddingBottom: '2rem' }}>
-        <header style={{ marginBottom: '3rem' }}>
-          <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', textDecoration: 'none', marginBottom: '1rem', fontWeight: 'bold' }}>
-            <ChevronLeft size={20} /> Back to Dashboard
-          </Link>
-          <h1 className="dashboard-title">Medications & Appointments</h1>
-          <p className="dashboard-subtitle">Manage your health schedule and track your wellness progress.</p>
-        </header>
+      <div className="dash-page" style={{ maxWidth: '1080px' }}>
 
-        <div className="dashboard-grid" style={{ gridTemplateColumns: '2fr 1fr', gap: '4rem' }}>
-          {/* Medications Section */}
-          <section>
-            <div className="appointments-card">
-              <div className="appointments-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <Pill className="text-primary" />
-                  <h3 style={{ margin: 0 }}>Medication List</h3>
-                </div>
-                <button 
-                  onClick={() => setIsModalOpen(true)}
-                  className="view-calendar"
-                  style={{ background: 'var(--primary)', border: 'none', cursor: 'pointer', color: 'white', padding: '0.5rem 1rem', borderRadius: '1rem' }}
-                >
-                  + Add New
-                </button>
-              </div>
-              
-              <div className="appointments-list">
-                {meds.length === 0 ? (
-                  <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--on-surface-variant)' }}>
-                    No medications added yet.
-                  </div>
-                ) : (
-                  meds.map((med) => (
-                    <div key={med.id} className="appointment-item" style={{ opacity: medLogsToday[med.id] ? 0.6 : 1 }}>
-                      <div className="date-box" style={{ background: 'rgba(181, 26, 43, 0.1)', color: 'var(--primary)' }}>
-                        <Pill size={20} />
-                      </div>
-                      <div className="appointment-details">
-                        <h4 style={{ textDecoration: medLogsToday[med.id] ? 'line-through' : 'none' }}>{med.name}</h4>
-                        <p>{med.dose} • {med.time}</p>
-                        <p style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>{med.instruction}</p>
-                      </div>
-                      <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        {!medLogsToday[med.id] && (
-                          <button 
-                            className="med-log-btn"
-                            style={{ margin: 0, padding: '0.5rem 1rem', fontSize: '0.75rem' }}
-                            onClick={() => onLogMed(med.id)}
-                            disabled={loggedId === med.id}
-                          >
-                            {loggedId === med.id ? 'Logging...' : 'Log'}
-                          </button>
-                        )}
-                        <button 
-                          onClick={() => handleDeleteMed(med.id)}
-                          style={{ background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: '0.5rem' }}
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </section>
+        <Link to="/dashboard" className="med-back-link">
+          <ChevronLeft size={18} /> Back to Dashboard
+        </Link>
 
-          {/* Appointments Section */}
-          <section>
-            <div className="appointments-card">
-              <div className="appointments-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <Calendar className="text-primary" />
-                  <h3 style={{ margin: 0 }}>Upcoming Sessions</h3>
-                </div>
-                <button 
-                  onClick={() => setIsApptModalOpen(true)}
-                  className="view-calendar"
-                  style={{ background: 'var(--primary)', border: 'none', cursor: 'pointer', color: 'white', padding: '0.5rem 1rem', borderRadius: '1rem' }}
-                >
-                  + Add New
-                </button>
-              </div>
-              
-              <div className="appointments-list">
-                {appointments.length === 0 ? (
-                  <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--on-surface-variant)' }}>
-                    No appointments scheduled.
-                  </div>
-                ) : (
-                  appointments.map((apt) => (
-                    <div key={apt.id} className="appointment-item" style={{ opacity: apt.completed ? 0.6 : 1 }}>
-                      <div 
-                        className="date-box" 
-                        onClick={() => handleToggleAppt(apt.id)}
-                        style={{ cursor: 'pointer', background: apt.completed ? 'rgba(255, 255, 255, 0.05)' : 'rgba(181, 26, 43, 0.1)', height: 'auto', minHeight: '60px', padding: '0.5rem' }}
-                      >
-                        <span className="date-month" style={{ fontSize: '0.65rem' }}>{apt.month} {apt.year}</span>
-                        <span className="date-day">{apt.date}</span>
-                      </div>
-                      <div className="appointment-details" onClick={() => handleToggleAppt(apt.id)} style={{ cursor: 'pointer', flex: 1 }}>
-                        <h4 style={{ textDecoration: apt.completed ? 'line-through' : 'none' }}>{apt.title}</h4>
-                        <p>{apt.type} {apt.completed && '✓'}</p>
-                      </div>
-                      <button 
-                        onClick={() => handleDeleteAppt(apt.id)}
-                        style={{ background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: '0.5rem' }}
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </section>
+        <div className="dash-topbar">
+          <div>
+            <h1 className="dash-greeting">Medications &amp; Appointments</h1>
+            <p className="dash-date">Manage your health schedule and track your wellness progress.</p>
+          </div>
         </div>
-        </main>
+
+        <div className="med-page-grid">
+
+          {/* ── Medications ── */}
+          <div className="dash-card">
+            <div className="dash-card-header">
+              <div className="dash-card-title-row">
+                <div className="dash-card-icon-wrap" style={{ background: 'var(--primary-container)' }}>
+                  <Pill size={16} style={{ color: 'var(--primary)' }} />
+                </div>
+                <h2 className="dash-card-title">Medication List</h2>
+                <span className="dash-count-chip">{meds.length} total</span>
+              </div>
+              <button className="dash-add-btn" onClick={() => setIsModalOpen(true)}>
+                <Plus size={14} /> Add New
+              </button>
+            </div>
+
+            <div className="dash-card-body">
+              {meds.length === 0 ? (
+                <div className="dash-empty-state">
+                  <Pill size={28} style={{ opacity: 0.2 }} />
+                  <p>No medications added yet.</p>
+                  <button className="dash-empty-cta" onClick={() => setIsModalOpen(true)}>Add your first medication</button>
+                </div>
+              ) : (
+                <div className="dash-med-row-list">
+                  {meds.map(med => (
+                    <div key={med.id} className={`dash-med-row ${medLogsToday[med.id] ? 'taken' : ''}`}>
+                      <div className="dash-med-row-dot" style={{ background: medLogsToday[med.id] ? 'var(--secondary)' : 'var(--primary)' }} />
+                      <div className="dash-med-row-info" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.1rem' }}>
+                        <span className="dash-med-row-name">{med.name}</span>
+                        <span className="dash-med-row-meta">
+                          {med.dose} · {med.time}{med.instruction ? ` · ${med.instruction}` : ''}
+                        </span>
+                      </div>
+                      {medLogsToday[med.id]
+                        ? <span className="dash-taken-chip">✓ Taken</span>
+                        : <button className="dash-med-row-log" onClick={() => onLogMed(med.id)} disabled={loggedId === med.id}>
+                            {loggedId === med.id ? '...' : 'Log'}
+                          </button>
+                      }
+                      <button className="dash-delete-btn" onClick={() => handleDeleteMed(med.id)}><X size={13} /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Appointments ── */}
+          <div className="dash-card">
+            <div className="dash-card-header">
+              <div className="dash-card-title-row">
+                <div className="dash-card-icon-wrap" style={{ background: 'var(--tertiary-container)' }}>
+                  <Calendar size={16} style={{ color: 'var(--tertiary)' }} />
+                </div>
+                <h2 className="dash-card-title">Sessions</h2>
+                <span className="dash-count-chip">{upcomingAppts.length} upcoming</span>
+              </div>
+              <button className="dash-add-btn" onClick={() => setIsApptModalOpen(true)}>
+                <Plus size={14} /> Add New
+              </button>
+            </div>
+
+            <div className="dash-card-body">
+              {appointments.length === 0 ? (
+                <div className="dash-empty-state">
+                  <Calendar size={28} style={{ opacity: 0.2 }} />
+                  <p>No appointments scheduled.</p>
+                  <button className="dash-empty-cta" onClick={() => setIsApptModalOpen(true)}>Schedule your first appointment</button>
+                </div>
+              ) : (
+                <div className="dash-appt-row-list">
+                  {appointments.map(apt => (
+                    <div key={apt.id} className={`dash-appt-row ${apt.completed ? 'completed' : ''}`}>
+                      <div className="dash-appt-row-date">
+                        <span className="dash-appt-row-month">{apt.month}</span>
+                        <span className="dash-appt-row-day">{apt.date}</span>
+                        <span className="dash-appt-row-year">{apt.year}</span>
+                      </div>
+                      <div className="dash-appt-row-info" onClick={() => handleToggleAppt(apt.id)}>
+                        <span className="dash-appt-row-title">{apt.title}</span>
+                        {apt.type && <span className="dash-appt-row-type">{apt.type}</span>}
+                      </div>
+                      <div className="dash-appt-row-actions">
+                        <button
+                          className={`dash-appt-toggle ${apt.completed ? 'done' : ''}`}
+                          onClick={() => handleToggleAppt(apt.id)}
+                          title={apt.completed ? 'Mark incomplete' : 'Mark complete'}
+                        >
+                          <Check size={13} />
+                        </button>
+                        <button className="dash-delete-btn" onClick={() => handleDeleteAppt(apt.id)}><X size={13} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      {/* Add Medication Modal */}
+      {/* ── Add Medication Modal ── */}
       <AnimatePresence>
         {isModalOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="modal-overlay"
-            onClick={() => setIsModalOpen(false)}
-          >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="modal-content"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button className="modal-close" onClick={() => setIsModalOpen(false)}>
-                <X size={20} />
-              </button>
-              
-              <div className="modal-header">
-                <h2 className="modal-title">New Medication</h2>
-                <p className="modal-subtitle">Add a new drug to your tracking list.</p>
+          <Modal title="New Medication" subtitle="Add a new drug to your tracking list." onClose={() => setIsModalOpen(false)}>
+            <form onSubmit={onAddMed}>
+              <div className="form-grid">
+                <div className="form-group form-group-full">
+                  <label className="form-label">Drug Name</label>
+                  <input className="form-input" placeholder="e.g. Lisinopril" value={newMed.name} onChange={e => setNewMed({...newMed, name: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Dosage</label>
+                  <input className="form-input" placeholder="e.g. 10mg" value={newMed.dose} onChange={e => setNewMed({...newMed, dose: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Time</label>
+                  <input className="form-input" placeholder="e.g. 8:00 AM" value={newMed.time} onChange={e => setNewMed({...newMed, time: e.target.value})} required />
+                </div>
+                <div className="form-group form-group-full">
+                  <label className="form-label">Instructions</label>
+                  <input className="form-input" placeholder="e.g. Take with water" value={newMed.instruction} onChange={e => setNewMed({...newMed, instruction: e.target.value})} />
+                </div>
               </div>
-
-              <form onSubmit={onAddMed}>
-                <div className="form-grid">
-                  <div className="form-group form-group-full">
-                    <label className="form-label">Drug Name</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder="e.g. Lisinopril"
-                      value={newMed.name}
-                      onChange={(e) => setNewMed({...newMed, name: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Dosage</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder="e.g. 10mg"
-                      value={newMed.dose}
-                      onChange={(e) => setNewMed({...newMed, dose: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Time</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder="e.g. 08:00 AM"
-                      value={newMed.time}
-                      onChange={(e) => setNewMed({...newMed, time: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="form-group form-group-full">
-                    <label className="form-label">Instructions</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder="e.g. Take with water"
-                      value={newMed.instruction}
-                      onChange={(e) => setNewMed({...newMed, instruction: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                <div className="modal-footer">
-                  <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                  <button type="submit" className="btn-primary-modal">Add Medication</button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn-primary-modal">Add Medication</button>
+              </div>
+            </form>
+          </Modal>
         )}
       </AnimatePresence>
 
-      {/* Add Appointment Modal */}
+      {/* ── Add Appointment Modal ── */}
       <AnimatePresence>
         {isApptModalOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="modal-overlay"
-            onClick={() => setIsApptModalOpen(false)}
-          >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="modal-content"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button className="modal-close" onClick={() => setIsApptModalOpen(false)}>
-                <X size={20} />
-              </button>
-              
-              <div className="modal-header">
-                <h2 className="modal-title">New Appointment</h2>
-                <p className="modal-subtitle">Schedule a new session in your calendar.</p>
+          <Modal title="New Appointment" subtitle="Schedule a new session in your calendar." onClose={() => setIsApptModalOpen(false)}>
+            <form onSubmit={onAddAppt}>
+              <div className="form-grid">
+                <div className="form-group form-group-full">
+                  <label className="form-label">Title / Doctor</label>
+                  <input className="form-input" placeholder="e.g. Dr. Rodriguez" value={newAppt.title} onChange={e => setNewAppt({...newAppt, title: e.target.value})} required />
+                </div>
+                <div className="form-group form-group-full">
+                  <label className="form-label">Date</label>
+                  <DatePicker value={newAppt.dateValue} onChange={(iso) => setNewAppt({...newAppt, dateValue: iso})} />
+                </div>
+                <div className="form-group form-group-full">
+                  <label className="form-label">Details (Type &amp; Time)</label>
+                  <input className="form-input" placeholder="e.g. Physical Therapy · 2:30 PM" value={newAppt.type} onChange={e => setNewAppt({...newAppt, type: e.target.value})} />
+                </div>
               </div>
-
-              <form onSubmit={onAddAppt}>
-                <div className="form-grid">
-                  <div className="form-group form-group-full">
-                    <label className="form-label">Title / Doctor</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder="e.g. Dr. Rodriguez"
-                      value={newAppt.title}
-                      onChange={(e) => setNewAppt({...newAppt, title: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Day</label>
-                    <select 
-                      className="form-input" 
-                      value={newAppt.date}
-                      onChange={(e) => setNewAppt({...newAppt, date: e.target.value})}
-                      required
-                    >
-                      {days.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Month</label>
-                    <select 
-                      className="form-input" 
-                      value={newAppt.month}
-                      onChange={(e) => setNewAppt({...newAppt, month: e.target.value})}
-                      required
-                    >
-                      {months.map(m => <option key={m} value={m}>{m}</option>)}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Year</label>
-                    <select 
-                      className="form-input" 
-                      value={newAppt.year}
-                      onChange={(e) => setNewAppt({...newAppt, year: e.target.value})}
-                      required
-                    >
-                      {years.map(y => <option key={y} value={y}>{y}</option>)}
-                    </select>
-                  </div>
-                  <div className="form-group form-group-full">
-                    <label className="form-label">Details (Type & Time)</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder="e.g. Physical Therapy • 02:30 PM"
-                      value={newAppt.type}
-                      onChange={(e) => setNewAppt({...newAppt, type: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                <div className="modal-footer">
-                  <button type="button" className="btn-secondary" onClick={() => setIsApptModalOpen(false)}>Cancel</button>
-                  <button type="submit" className="btn-primary-modal">Schedule Appointment</button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setIsApptModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn-primary-modal">Schedule Appointment</button>
+              </div>
+            </form>
+          </Modal>
         )}
       </AnimatePresence>
     </AppLayout>

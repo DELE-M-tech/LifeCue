@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard.jsx';
 import MedicationsPage from './components/MedicationsPage.jsx';
 import CalendarPage from './components/CalendarPage.jsx';
 import Logger from './components/Logger.jsx';
+import ProfilePage from './components/ProfilePage.jsx';
 import { HealthProvider } from './context/HealthContext.jsx';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/medications" element={<MedicationsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/logger" element={<Logger />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </Router>
     </HealthProvider>

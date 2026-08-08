@@ -226,8 +226,10 @@ export function HealthProvider({ children }) {
       return;
     }
     try {
+      const med = meds.find(m => m.id === id);
       const { error } = await supabase.from('med_logs').upsert({
-        uid: user.id, med_id: id, log_date: todayStr(), taken: true, taken_at: new Date().toISOString()
+        uid: user.id, med_id: id, log_date: todayStr(), taken: true, taken_at: new Date().toISOString(),
+        med_name: med?.name, med_dose: med?.dose, med_time: med?.time
       }, { onConflict: 'uid,med_id,log_date' });
       if (error) throw error;
       setMedLogsToday(prev => ({ ...prev, [id]: true }));
@@ -293,7 +295,8 @@ export function HealthProvider({ children }) {
       // snapshot into today's appt_logs
       await supabase.from('appt_logs').upsert({
         uid: user.id, appt_id: id, log_date: todayStr(),
-        completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null
+        completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null,
+        appt_title: appt.title, appt_type: appt.type, appt_month: appt.month, appt_date: appt.date, appt_year: appt.year
       }, { onConflict: 'uid,appt_id,log_date' });
 
       persistDailyLog({});
@@ -327,42 +330,19 @@ export function HealthProvider({ children }) {
     if (!user || !isSupabaseConfigured) return null;
     try {
       const { data: medLogs } = await supabase
-        .from('med_logs').select('med_id, taken, taken_at').eq('uid', user.id).eq('log_date', logDate);
-
-      const medIds = (medLogs ?? []).map(l => l.med_id);
-      let medsInfo = [];
-      if (medIds.length > 0) {
-        const { data: medsData } = await supabase
-          .from('meds').select('id, name, dose, time').in('id', medIds);
-        medsInfo = medsData ?? [];
-      }
+        .from('med_logs').select('med_name, med_dose, med_time, taken, taken_at').eq('uid', user.id).eq('log_date', logDate);
 
       const takenDetails = (medLogs ?? [])
         .filter(l => l.taken)
-        .map(l => {
-          const med = medsInfo.find(m => m.id === l.med_id);
-          return med ? { ...med, taken_at: l.taken_at } : null;
-        })
-        .filter(Boolean);
+        .map(l => ({ name: l.med_name, dose: l.med_dose, time: l.med_time, taken_at: l.taken_at }));
 
-      // appointment logs for this day
       const { data: apptLogs } = await supabase
-        .from('appt_logs').select('appt_id, completed, completed_at').eq('uid', user.id).eq('log_date', logDate);
+        .from('appt_logs').select('appt_title, appt_type, appt_month, appt_date, appt_year, completed, completed_at').eq('uid', user.id).eq('log_date', logDate);
 
-      const apptIds = (apptLogs ?? []).map(l => l.appt_id);
-      let apptsInfo = [];
-      if (apptIds.length > 0) {
-        const { data: apptsData } = await supabase
-          .from('appointments').select('id, title, type, month, date, year').in('id', apptIds);
-        apptsInfo = apptsData ?? [];
-      }
-
-      const apptDetails = (apptLogs ?? [])
-        .map(l => {
-          const appt = apptsInfo.find(a => a.id === l.appt_id);
-          return appt ? { ...appt, completed: l.completed, completed_at: l.completed_at } : null;
-        })
-        .filter(Boolean);
+      const apptDetails = (apptLogs ?? []).map(l => ({
+        title: l.appt_title, type: l.appt_type, month: l.appt_month, date: l.appt_date, year: l.appt_year,
+        completed: l.completed, completed_at: l.completed_at
+      }));
 
       return { medsTakenDetail: takenDetails, apptsDetail: apptDetails };
     } catch (err) {

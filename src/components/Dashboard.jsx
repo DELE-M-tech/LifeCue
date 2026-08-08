@@ -5,16 +5,7 @@ import { useState, useEffect } from 'react';
 import { useHealth } from '../context/HealthContext.jsx';
 import AppLayout from './AppLayout.jsx';
 import DatePicker from './DatePicker.jsx';
-
-const Spinner = () => (
-  <div className="app-loading">
-    <motion.div
-      animate={{ rotate: 360 }}
-      transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-      className="app-spinner"
-    />
-  </div>
-);
+import { SkelBlock, SkelCard, SkelRow, SkelTopbar } from './Skeletons.jsx';
 
 function Modal({ title, subtitle, onClose, children }) {
   return (
@@ -111,7 +102,29 @@ export default function Dashboard() {
     setTrackerModal(null);
   };
 
-  if (!isAuthReady || !user) return <Spinner />;
+  if (!isAuthReady || !user) {
+    return (
+      <AppLayout>
+        <div className="skel-page">
+          <SkelTopbar />
+          <div className="dash-stack">
+            <SkelCard>
+              <SkelBlock width="140px" height="1.2rem" style={{ marginBottom: '1rem' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <SkelRow /><SkelRow /><SkelRow />
+              </div>
+            </SkelCard>
+            <SkelCard>
+              <SkelBlock width="140px" height="1.2rem" style={{ marginBottom: '1rem' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <SkelRow /><SkelRow />
+              </div>
+            </SkelCard>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   const completion = calculateCompletion();
   const nextMed = meds.find(m => !medLogsToday[m.id]);
