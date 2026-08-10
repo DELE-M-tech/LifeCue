@@ -278,6 +278,12 @@ a {
   }
 }
 
+@media (max-width: 1023px) {
+  .hero-phone-container {
+    display: none;
+  }
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
