@@ -1,7 +1,7 @@
 import { NavLink, useNavigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard, Pill, CalendarDays, Activity,
-  Settings, LogOut, ChevronRight
+  LogOut, ChevronRight
 } from 'lucide-react';
 import { useHealth } from '../context/HealthContext.jsx';
 
@@ -49,11 +49,6 @@ export default function AppLayout({ children }) {
         </nav>
 
         <div className="sidebar-bottom">
-          <NavLink to="/settings" className={({ isActive }) => `sidebar-nav-item ${isActive ? 'active' : ''}`}>
-            <Settings size={18} />
-            <span>Settings</span>
-          </NavLink>
-
           <button onClick={handleLogout} className="sidebar-logout-btn">
             <LogOut size={18} />
             <span>Sign Out</span>
